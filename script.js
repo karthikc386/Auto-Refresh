@@ -29,21 +29,17 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     
     getDataFromStorage("clearCache", (clearCache) => {
-        if (clearCache) {
-            clearCacheCheckbox.checked = clearCache === "true";
-        }
+        clearCacheCheckbox.checked = clearCache === "true";
     });
     
     getDataFromStorage("loopRefresh", (loopRefresh) => {
-        if (loopRefresh) {
-            loopRefreshCheckbox.checked = loopRefresh === "true";
-        }
+        loopRefreshCheckbox.checked = loopRefresh === "true";
     });
 
     getDataFromStorage("autoRefreshStatus", (autoRefreshStatus) => {
         if (autoRefreshStatus !== null) {
-            if (autoRefreshStatus === "ON" && loopRefreshCheckbox.checked) {
-                toggle.checked =  "true";;
+            if (autoRefreshStatus === "ON") {
+                toggle.checked =  true;
                 status.textContent = "ON";
                 setRefreshInterval();
             }
@@ -62,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function() {
             secondsLeftElement.textContent = "-";
             clearInterval(refreshIntervalId);
             clearInterval(intervalId);
-            chrome.storage.local.clear();
+            setDataInStorage("autoRefreshStatus", "OFF");
         }
     });
 
@@ -80,34 +76,45 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     function setRefreshInterval() {       
-        
-        const refreshInterval = parseInt(document.getElementById('refreshInterval').value, 10) * 1000; 
-
-        setDataInStorage("refreshInterval", refreshIntervalInput.value);
-        setDataInStorage("clearCache", clearCacheCheckbox.checked);
-        setDataInStorage("loopRefresh", loopRefreshCheckbox.checked);
-        
+        const refreshInterval = parseInt(refreshIntervalInput.value, 10) * 1000; 
+    
+        setDataInStorage("refreshInterval", parseInt(refreshIntervalInput.value, 10));
+        setDataInStorage("clearCache", clearCacheCheckbox.checked.toString());
+        setDataInStorage("loopRefresh", loopRefreshCheckbox.checked.toString());
+    
         if (refreshIntervalId) {
             clearInterval(refreshIntervalId);
         }
-
+    
         refreshIntervalId = setInterval(refreshPage, refreshInterval);
-        
+    
         updateLastRefreshed();
-        updateNextRefresh(refreshInterval);
+        updateNextRefresh(refreshInterval);  // ✅ Ensure this is called!
         updateSecondsLeft(refreshInterval);
     }
-
+    
+    
     function refreshPage() {
-        updateLastRefreshed();
-        if(clearCacheCheckbox.checked)
-            location.reload(true);
-        else
-            //location.reload();
-            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        updateLastRefreshed();  // Update last refreshed time
+    
+        const refreshInterval = parseInt(refreshIntervalInput.value, 10) * 1000;
+    
+        if (clearCacheCheckbox.checked) {
+            location.reload();  // No need for argument
+        } else {
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
                 chrome.tabs.reload(tabs[0].id);
-              });
+            });
+        }
+    
+        // 🛠️ Fix: Update Next Refresh Time after Refresh
+        updateNextRefresh(refreshInterval);
+    
+        // Restart the countdown timer for next refresh
+        updateSecondsLeft(refreshInterval);
     }
+    
+    
 
     function updateLastRefreshed() {
         const now = new Date();
@@ -119,17 +126,26 @@ document.addEventListener("DOMContentLoaded", function() {
         const nextRefreshTime = new Date(now.getTime() + interval);
         nextRefreshElement.textContent = nextRefreshTime.toLocaleTimeString();
     }
+   
 
     function updateSecondsLeft(interval) {
-        secondsLeftElement.textContent = (interval / 1000);
-        
+        let timeLeft = interval / 1000; // Convert milliseconds to seconds
+        secondsLeftElement.textContent = timeLeft;
+    
+        // Clear any previous countdown interval before starting a new one
         if (intervalId) {
             clearInterval(intervalId);
         }
-
-        intervalId = setInterval(function() {
-            interval -= 1000;
-            secondsLeftElement.textContent = (interval / 1000);
+    
+        intervalId = setInterval(function () {
+            timeLeft -= 1;
+            secondsLeftElement.textContent = timeLeft;
+    
+            // If countdown reaches 0, stop the countdown
+            if (timeLeft <= 0) {
+                clearInterval(intervalId);
+            }
         }, 1000);
     }
+    
 });

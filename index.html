@@ -6,21 +6,41 @@
 <title>Auto Refresh Page</title>
 
 <style>
- 
-/* The switch - the box around the slider */
+/* General Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  background: #f4f4f4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+/* Card Container */
+.container {
+  background: white;
+  padding: 20px;
+  width: 320px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* Toggle Switch */
 .switch {
   position: relative;
   display: inline-block;
-  width: 42px;
-  height: 24px;
+  width: 50px;
+  height: 28px;
 }
 
-/* Hide default HTML checkbox */
 .switch input {
-  display: none;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
-/* The slider */
 .slider {
   position: absolute;
   cursor: pointer;
@@ -29,7 +49,6 @@
   right: 0;
   bottom: 0;
   background-color: #e12b2b;
-  -webkit-transition: .4s;
   transition: .4s;
   border-radius: 34px;
 }
@@ -37,89 +56,106 @@
 .slider:before {
   position: absolute;
   content: "";
-  height: 18px;
-  width: 18px;
+  height: 20px;
+  width: 20px;
   left: 4px;
   bottom: 4px;
   background-color: white;
-  -webkit-transition: .4s;
   transition: .4s;
   border-radius: 50%;
 }
 
 input:checked + .slider {
-  background-color: #76d667;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #76d667;
+  background-color: #4CAF50;
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(18px);
-  -ms-transform: translateX(18px);
-  transform: translateX(18px);
+  transform: translateX(22px);
 }
 
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
-.toggle-container {
-  text-align: right;
-}
-
-#status {
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-  color: #333;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none; /* Ensure the status text doesn't interfere with clicking the toggle */
-}
-
-.button {
-  background-color: #04AA6D;
-  border: none;
-  color: white;
-  padding: 4px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
+.status-text {
   font-size: 14px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+/* Inputs & Buttons */
+input[type="number"] {
+  width: 50px;
+  padding: 6px;
+  margin: 10px 0;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+button {
+  background-color: #04AA6D;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #038c5a;
+}
+
+.checkbox-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* Status Display */
+.status-info {
+  background: #f9f9f9;
+  padding: 10px;
+  margin-top: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
 }
 
 </style>
 </head>
 <body>
-    <div class="toggle-container">
-        <label class="switch">
+
+  <div class="container">
+      <h3>Auto Refresh</h3>
+      
+      <!-- Toggle Switch -->
+      <label class="switch">
           <input type="checkbox" id="toggle">
-          <span class="slider round">
-            <span id="status">OFF</span>
-          </span>
-        </label>
-    </div>
+          <span class="slider round"></span>
+      </label>
+      <div class="status-text" id="status">OFF</div>
 
-    <label for="refreshInterval">Refresh Interval (seconds):</label>
-    <input type="number" id="refreshInterval" value="15" min="5" step="1">
-    <button id="setRefreshInterval" type="button" class="button">Set Interval</button>
-    <br/>
-    Clear Cache?<input type="checkbox" id="clearCache">
-    Loop?<input type="checkbox" id="loopRefresh">
+      <!-- Interval Input -->
+      <label for="refreshInterval">Interval (sec):</label>
+      <input type="number" id="refreshInterval" value="5" min="5">
 
-    <hr>
+      <!-- Set Interval Button -->
+      <button id="setRefreshInterval">Set Interval</button>
 
-    <p>Page Refresh in : <span id="secondsLeft">-</span> seconds</p>
-    <p>Last Refreshed: <span id="lastRefreshed"></span></p>
-    <p>Next Refresh: <span id="nextRefresh"></span></p>
+      <!-- Checkboxes -->
+      <div class="checkbox-container">
+          <label>Clear Cache? <input type="checkbox" id="clearCache"></label>
+          <label>Loop? <input type="checkbox" id="loopRefresh"></label>
+      </div>
+
+      <!-- Status Section -->
+      <div class="status-info">
+          <p>Page Refresh in: <strong><span id="secondsLeft">-</span></strong> sec</p>
+          <p>Last Refresh: <strong><span id="lastRefreshed">-</span></strong></p>
+          <p>Next Refresh: <strong><span id="nextRefresh">-</span></strong></p>
+      </div>
+  </div>
     
     <script type="text/javascript" src="script.js"></script>
 </body>
